@@ -23,8 +23,12 @@ public class DownloadIntentService extends IntentService {
     public static final int RESULT_CODE = 0;
     public static final int INVALID_URL_CODE = 1;
     public static final int CONNECTION_ERROR_CODE = 2;
-    public static final int INPUT_STREAN_ERROR_CODE = 3;
+    public static final int INPUT_STREAM_ERROR_CODE = 3;
     public static final int ERROR_CODE = 4;
+
+    public DownloadIntentService() {
+        super("Anonymous");
+    }
 
     public DownloadIntentService(String name) {
         super(name);
@@ -43,15 +47,8 @@ public class DownloadIntentService extends IntentService {
             // Create the url object
             try {
                 url = new URL(url_string);
-                Log.d(TAG, String.format("About to open connection to %s", url_string));
-                urlConnection = (HttpURLConnection) url.openConnection();
             } catch (MalformedURLException exc) {
                 reply.send(INVALID_URL_CODE);
-                return;
-            } catch (java.io.IOException e){
-                String msg = String.format("DownloadIntentService() openConnection() IOException ", e);
-                Log.d(TAG, msg);
-                reply.send(CONNECTION_ERROR_CODE);
                 return;
             } catch (Exception exc) {
                 // could do better by treating the different sax/xml exceptions individually
@@ -82,15 +79,14 @@ public class DownloadIntentService extends IntentService {
             catch (java.io.IOException e) {
                 String msg = String.format("makeYoutubeRipApiCall() getInputStream() IOException ", e);
                 Log.d(TAG, msg);
-                reply.send(INPUT_STREAN_ERROR_CODE);
-                return;
+                reply.send(INPUT_STREAM_ERROR_CODE);
             } catch (Exception exc) {
                 // could do better by treating the different sax/xml exceptions individually
                 reply.send(ERROR_CODE);
-                return;
             }
             finally {
                 urlConnection.disconnect();
+                reply.send(RESULT_CODE);
             }
 
         } catch (PendingIntent.CanceledException exc) {
