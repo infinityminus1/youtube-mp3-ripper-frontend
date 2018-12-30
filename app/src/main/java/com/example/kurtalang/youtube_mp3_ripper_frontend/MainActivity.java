@@ -11,11 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -91,48 +86,14 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-            // TODO: Make api GET call to "54.215.234.18&uri="
             makeYoutubeRipApiCall(sharedText);
         }
-
-        Log.d(TAG, "handleSendText() received NO shared text");
+        else {
+            Log.d(TAG, "handleSendText() received NO shared text");
+        }
     }
 
     public void makeYoutubeRipApiCall(String url) {
-        final String TAG = "MainActivity.makeYoutubeRipApiCall";
-        final String URL_BASE = "http://54.215.234.18/?url=";
-        URL url_obj;
-        HttpURLConnection urlConnection;
-
-        try {
-            String url_string = URL_BASE + url;
-            url_obj = new URL(url_string);
-        }
-        catch (java.net.MalformedURLException e) {
-            String msg = String.format("makeYoutubeRipApiCall() MalformedURLException ", e);
-            Log.d(TAG, msg);
-            return;
-        }
-
-        try {
-            urlConnection = (HttpURLConnection) url_obj.openConnection();
-        }
-        catch (java.io.IOException e) {
-            String msg = String.format("makeYoutubeRipApiCall() openConnection() IOException ", e);
-            Log.d(TAG, msg);
-            return;
-        }
-
-        try {
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-        }
-        catch (java.io.IOException e) {
-            String msg = String.format("makeYoutubeRipApiCall() getInputStream() IOException ", e);
-            Log.d(TAG, msg);
-            return;
-        }
-        finally {
-            urlConnection.disconnect();
-        }
+        return;
     }
 }
