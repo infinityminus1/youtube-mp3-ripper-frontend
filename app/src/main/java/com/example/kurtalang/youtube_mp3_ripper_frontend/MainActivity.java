@@ -12,14 +12,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import com.android.volley.*;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int MP3_DOWNLOAD_REQUEST_CODE = 1000;
-    private final static String BACKEND_URL_BASE = "http://54.215.234.18/?url=";
+    private final static String BACKEND_URL_BASE = "http://52.52.45.237/?url=";  // AWS elastic IP
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,8 +149,7 @@ public class MainActivity extends AppCompatActivity {
         //Setting description of request
 //        request.setDescription("Android Data download using DownloadManager.");
 
-        //Set the local destination for the downloaded file to a path
-        //within the application's external files directory
+        //Set the local destination for the downloaded file to a path within the application's external files directory
         request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
 
         //Enqueue download and save into referenceId
@@ -161,42 +164,46 @@ public class MainActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = BACKEND_URL_BASE + youtube_url;
 
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.HEAD, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // TODO: find "youtube_title" header value and return here.
-                        Log.d(TAG,"Response is: " + response.substring(0, 500));
+        // Create new volley request for a http HEAD call
+        MetaRequest jsonObjectRequest = new MetaRequest(Request.Method.HEAD, url,null,
+                new Response.Listener<JSONObject>() {
 
-                        downloadData(youtube_url,"PLACE_TITLE_HERE");
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String youtube_title = getYoutubeTitleFromResponseHeaders(response);
+
+                        // Call download manager with given url and title
+                        downloadData(youtube_url, youtube_title);
+
                     }
-                },
-                new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
+
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG,String.format("That didn't work! %s", error));
                     }
-                }
-        );
-        stringRequest.setRetryPolicy(new RetryPolicy() {
-            @Override
-            public int getCurrentTimeout() {
-                return 5000000;
-            }
-
-            @Override
-            public int getCurrentRetryCount() {
-                return 50000;
-            }
-
-            @Override
-            public void retry(VolleyError error) throws VolleyError {
-
-            }
-        });
+                });
 
         // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+        queue.add(jsonObjectRequest);
+    }
+
+    public String getYoutubeTitleFromResponseHeaders(JSONObject response) {
+        final String TAG = "getYoutubeTitleFromResponseHeaders";
+
+        Log.d(TAG,"Response: " + response.toString());
+
+        try {
+            JSONObject headers = response.getJSONObject("headers");
+            Log.d(TAG, "Response.headers: " + headers);
+
+            String youtube_title = headers.getString("youtube_title");
+            Log.d(TAG, "Response.headers.youtube_title: " + youtube_title);
+
+            return youtube_title;
+
+        } catch (JSONException je) {
+            return "unknown";
+        }
     }
 }
