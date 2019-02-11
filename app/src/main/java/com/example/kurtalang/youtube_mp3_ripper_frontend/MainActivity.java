@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
 
     private long downloadData(String youtube_url, String youtube_title) {
 
+        final String TAG = "downloadData";
+
         String full_url = BACKEND_URL_BASE + youtube_url;
         Uri uri = Uri.parse(full_url);
 
@@ -136,12 +138,13 @@ public class MainActivity extends AppCompatActivity {
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(uri);
 
-//        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
+        request.allowScanningByMediaScanner();
 
-//        downloadManager.enqueue(request);
-        Toast.makeText(getApplicationContext(), "Downloading File", //To notify the Client that the file is being downloaded
-                Toast.LENGTH_LONG).show();
+        // Notify client once download is completed!
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+        // To notify the Client that the file is being downloaded
+        Toast.makeText(getApplicationContext(), "Downloading File", Toast.LENGTH_LONG).show();
 
         //Setting title of request
         request.setTitle(youtube_title);
@@ -153,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
         request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
 
         //Enqueue download and save into referenceId
+        Log.d(TAG, String.format("Enqueuing download request for %s", youtube_title));
         return downloadManager.enqueue(request);
     }
 
@@ -180,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG,String.format("That didn't work! %s", error));
+                        Log.d(TAG, String.format("That didn't work! %s", error));
                     }
                 });
 
