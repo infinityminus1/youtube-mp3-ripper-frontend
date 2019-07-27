@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         handleContentDeliveredByIntent();
+//        finish();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -109,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, msg);
                 return;
             }
+//            createIntentToSuppressUI(sharedText);
             get_youtube_title_with_volley(sharedText);
 //            downloadData(sharedText);
 //            createIntentForApiCall(sharedText);
@@ -117,6 +119,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void createIntentToSuppressUI(String url) {
+        Intent intent = new Intent(getApplicationContext(), MainService.class);
+        intent.putExtra(DownloadIntentService.URL_EXTRA, url);
+        startService(intent);
+    }
     public void createIntentForApiCall(String url) {
         PendingIntent pendingResult = createPendingResult(MP3_DOWNLOAD_REQUEST_CODE, new Intent(), 0);
         Intent intent = new Intent(getApplicationContext(), DownloadIntentService.class);
@@ -156,8 +163,10 @@ public class MainActivity extends AppCompatActivity {
         request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
 
         //Enqueue download and save into referenceId
-        Log.d(TAG, String.format("Enqueuing download request for %s", youtube_title));
-        return downloadManager.enqueue(request);
+        Log.d(TAG, String.format("Enqueuing download request for %s with the url %s", youtube_title, uri));
+        long download_id = downloadManager.enqueue(request);
+        Log.d(TAG, String.format("Download ID from enqueue request is %d", download_id));
+        return download_id;
     }
 
     public void get_youtube_title_with_volley(final String youtube_url) {
