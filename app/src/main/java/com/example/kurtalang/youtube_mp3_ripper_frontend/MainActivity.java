@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 //        request.setDescription("Android Data download using DownloadManager.");
 
         //Set the local destination for the downloaded file to a path within the application's external files directory
-        request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, youtube_title);
 
         //Enqueue download and save into referenceId
         Log.d(TAG, String.format("Enqueuing download request for %s with the url %s", youtube_title, uri));
