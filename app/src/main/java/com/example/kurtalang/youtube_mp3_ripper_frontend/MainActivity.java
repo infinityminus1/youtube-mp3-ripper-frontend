@@ -1,14 +1,26 @@
 package com.example.kurtalang.youtube_mp3_ripper_frontend;
 
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+import com.example.kurtalang.youtube_mp3_ripper_frontend.SongList.Song;
+import com.example.kurtalang.youtube_mp3_ripper_frontend.SongList.SongAdapter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ArrayList<Song> songList;
+    private ListView songView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
                 return;
             default:
                 setContentView(R.layout.activity_main);
-                Toolbar toolbar = findViewById(R.id.toolbar);
-                setSupportActionBar(toolbar);
+                createSongUI();
+//                Toolbar toolbar = findViewById(R.id.toolbar);
+//                setSupportActionBar(toolbar);
         }
     }
 
@@ -99,5 +112,47 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), HandleDownloadService.class);
         intent.putExtra(HandleDownloadService.URL_EXTRA, url);
         startService(intent);
+    }
+
+    public void createSongUI() {
+        songView = (ListView)findViewById(R.id.song_list);
+        songList = new ArrayList<Song>();
+
+        populateSongList();
+
+        Collections.sort(songList, new Comparator<Song>(){
+            public int compare(Song a, Song b){
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
+
+        SongAdapter songAdt = new SongAdapter(this, songList);
+        songView.setAdapter(songAdt);
+
+    }
+
+    public void populateSongList() {
+        //retrieve song info
+        ContentResolver musicResolver = getContentResolver();
+        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+
+        if(musicCursor!=null && musicCursor.moveToFirst()){
+            //get columns
+            int titleColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex
+                    (android.provider.MediaStore.Audio.Media.ARTIST);
+            //add songs to list
+            do {
+                long thisId = musicCursor.getLong(idColumn);
+                String thisTitle = musicCursor.getString(titleColumn);
+                String thisArtist = musicCursor.getString(artistColumn);
+                songList.add(new Song(thisId, thisTitle, thisArtist));
+            }
+            while (musicCursor.moveToNext());
+        }
     }
 }
