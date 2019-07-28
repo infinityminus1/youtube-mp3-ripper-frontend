@@ -110,7 +110,7 @@ public class HandleDownloadService extends IntentService {
         request.setTitle(youtube_title);
 
         //Set the local destination for the downloaded file to a path within the application's external files directory
-        request.setDestinationInExternalFilesDir(HandleDownloadService.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_MUSIC, youtube_title);
 
         //Enqueue download and save into referenceId
         Log.d(TAG, String.format("Enqueuing download request for %s with the url %s", youtube_title, uri));
