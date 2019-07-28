@@ -28,13 +28,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final String TAG = "MainActivity.onCreate";
 
-        handleContentDeliveredByIntent();
-        finish();
-
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        int whichIntent = handleContentDeliveredByIntent();
+        switch (whichIntent) {
+            case 1:
+                Log.d(TAG, "onCreate() received 1 for WhichIntent. Finish and return");
+                MainActivity.this.finish();
+                return;
+            default:
+                setContentView(R.layout.activity_main);
+                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                setSupportActionBar(toolbar);
+        }
     }
 
     @Override
@@ -80,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void handleContentDeliveredByIntent() {
+    public int handleContentDeliveredByIntent() {
         // Get intent, action and MIME type
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -89,11 +95,14 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
                 handleSendText(intent); // Handle text being sent
+                return 1;
             }
         } else {
             // Handle other intents, such as being started from the home screen
-            return;
+            return 0;
         }
+
+        return 0;
     }
 
     public void handleSendText(Intent intent) {
@@ -110,8 +119,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, msg);
                 return;
             }
-//            createIntentToSuppressUI(sharedText);
-            get_youtube_title_with_volley(sharedText);
+            Log.d(TAG, "handleSendText() about to call createIntentToSuppressUI.");
+            createIntentToSuppressUI(sharedText);
+//            get_youtube_title_with_volley(sharedText);
 //            downloadData(sharedText);
 //            createIntentForApiCall(sharedText);
         } else {
@@ -121,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void createIntentToSuppressUI(String url) {
         Intent intent = new Intent(getApplicationContext(), MainService.class);
-        intent.putExtra(DownloadIntentService.URL_EXTRA, url);
+        intent.putExtra(MainService.URL_EXTRA, url);
         startService(intent);
     }
     public void createIntentForApiCall(String url) {
