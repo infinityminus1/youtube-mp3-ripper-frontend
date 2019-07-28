@@ -16,20 +16,15 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainService extends IntentService {
+public class HandleDownloadService extends IntentService {
     private final static String BACKEND_URL_BASE = "http://52.52.45.237/?url=";  // AWS elastic IP
     public static final String URL_EXTRA = "url";
 
-
-    private static final String TAG = DownloadIntentService.class.getSimpleName();
-    private static final String URL_BASE = "http://54.193.90.124/?url=";
-
-
-    public MainService() {
+    public HandleDownloadService() {
         super("Anonymous");
     }
 
-    public MainService(String name) {
+    public HandleDownloadService(String name) {
         super(name);
     }
 
@@ -41,7 +36,7 @@ public class MainService extends IntentService {
 
     public void get_youtube_title_with_volley(final String youtube_url) {
 
-        final String TAG = "MainService.get_youtube_title_with_volley.handleSendText";
+        final String TAG = "HandleDownloadService.get_youtube_title_with_volley.handleSendText";
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -74,7 +69,7 @@ public class MainService extends IntentService {
     }
 
     public String getYoutubeTitleFromResponseHeaders(JSONObject response) {
-        final String TAG = "MainService.getYoutubeTitleFromResponseHeaders";
+        final String TAG = "HandleDownloadService.getYoutubeTitleFromResponseHeaders";
 
         Log.d(TAG,"Response: " + response.toString());
 
@@ -92,9 +87,9 @@ public class MainService extends IntentService {
         }
     }
 
-    private long downloadData(String youtube_url, String youtube_title) {
+    private void downloadData(String youtube_url, String youtube_title) {
 
-        final String TAG = "MainService.downloadData";
+        final String TAG = "HandleDownloadService.downloadData";
 
         String full_url = BACKEND_URL_BASE + youtube_url;
         Uri uri = Uri.parse(full_url);
@@ -115,13 +110,12 @@ public class MainService extends IntentService {
         request.setTitle(youtube_title);
 
         //Set the local destination for the downloaded file to a path within the application's external files directory
-        request.setDestinationInExternalFilesDir(MainService.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
+        request.setDestinationInExternalFilesDir(HandleDownloadService.this, Environment.DIRECTORY_DOWNLOADS, youtube_title);
 
         //Enqueue download and save into referenceId
         Log.d(TAG, String.format("Enqueuing download request for %s with the url %s", youtube_title, uri));
         long download_id = downloadManager.enqueue(request);
         Log.d(TAG, String.format("Download ID from enqueue request is %d", download_id));
-        return download_id;
     }
 
 }
